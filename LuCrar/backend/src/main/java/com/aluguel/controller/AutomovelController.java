@@ -1,8 +1,13 @@
 package com.aluguel.controller;
 
+import com.aluguel.dto.Dtos.AutomovelDTO;
+import com.aluguel.dto.Dtos.AutomovelRespostaDTO;
 import com.aluguel.model.Automovel;
+import com.aluguel.model.Usuario;
 import com.aluguel.repository.AutomovelRepository;
+import com.aluguel.repository.UsuarioRepository;
 import com.aluguel.service.UsuarioService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,21 +19,100 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/automoveis")
 @RequiredArgsConstructor
 public class AutomovelController {
+
     private final AutomovelRepository repo;
     private final UsuarioService usuarios;
 
     @GetMapping
-    public List<Automovel> listar() {
-        return repo.findAll();
+    public List<AutomovelRespostaDTO> listar() {
+        return repo.findAll().stream().map(this::toResposta).toList();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Automovel criar(@RequestBody Automovel a, Authentication auth) {
-        if (!usuarios.atual(auth.getName()).getPapel().isAgente()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Apenas agentes cadastram automóveis");
+    public AutomovelRespostaDTO criar(
+        @Valid @RequestBody AutomovelDTO dto,
+        Authentication auth
+    ) {
+        Usuario agente = usuarios.atual(auth.getName());
+        if (!agente.getPapel().isAgente()) {
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Apenas agentes cadastram automóveis"
+            );
         }
-        a.setId(null);
-        return repo.save(a);
+        if (repo.existsByMatriculaIgnoreCase(dto.matricula())) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Matrícula já cadastrada"
+            );
+        }
+        if (repo.existsByPlacaIgnoreCase(dto.placa())) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Placa já cadastrada"
+            );
+        }
+        Usuario proprietario = usuarios
+            .findById(dto.proprietarioId())
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Proprietário não encontrado"
+                )
+            );
+        if (
+            proprietario.getPapel() == com.aluguel.model.Papel.CLIENTE &&
+            dto.proprietario() !=
+                com.aluguel.model.Automovel.Proprietario.CLIENTE
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Proprietário cliente deve ter categoria CLIENTE"
+            );
+        }
+        if (
+            proprietario.getPapel() == com.aluguel.model.Papel.EMPRESA &&
+            dto.proprietario() !=
+                com.aluguel.model.Automovel.Proprietario.EMPRESA
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Proprietário empresa deve ter categoria EMPRESA"
+            );
+        }
+        if (
+            proprietario.getPapel() == com.aluguel.model.Papel.BANCO &&
+            dto.proprietario() != com.aluguel.model.Automovel.Proprietario.BANCO
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Proprietário banco deve ter categoria BANCO"
+            );
+        }
+        var a = new Automovel();
+        a.setMatricula(dto.matricula());
+        a.setAno(dto.ano());
+        a.setMarca(dto.marca());
+        a.setModelo(dto.modelo());
+        a.setPlaca(dto.placa());
+        a.setProprietario(dto.proprietario());
+        a.setProprietarioUsuario(proprietario);
+        return toResposta(repo.save(a));
+    }
+
+    private AutomovelRespostaDTO toResposta(Automovel a) {
+        return new AutomovelRespostaDTO(
+            a.getId(),
+            a.getMatricula(),
+            a.getAno(),
+            a.getMarca(),
+            a.getModelo(),
+            a.getPlaca(),
+            a.getProprietario(),
+            a.getProprietarioUsuario() != null
+                ? a.getProprietarioUsuario().getId()
+                : null
+        );
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
 public class PedidoController {
+
     private final PedidoService service;
     private final UsuarioService usuarios;
 
@@ -31,12 +32,19 @@ public class PedidoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PedidoAluguel criar(@Valid @RequestBody PedidoDTO d, Authentication a) {
+    public PedidoAluguel criar(
+        @Valid @RequestBody PedidoDTO d,
+        Authentication a
+    ) {
         return service.criar(d, usuarios.atual(a.getName()));
     }
 
     @PutMapping("/{id}")
-    public PedidoAluguel modificar(@PathVariable Long id, @Valid @RequestBody PedidoDTO d, Authentication a) {
+    public PedidoAluguel modificar(
+        @PathVariable Long id,
+        @Valid @RequestBody PedidoDTO d,
+        Authentication a
+    ) {
         return service.modificar(id, d, usuarios.atual(a.getName()));
     }
 
@@ -47,7 +55,11 @@ public class PedidoController {
     }
 
     @PostMapping("/{id}/avaliacao")
-    public PedidoAluguel avaliar(@PathVariable Long id, @RequestBody AvaliacaoDTO d, Authentication a) {
+    public PedidoAluguel avaliar(
+        @PathVariable Long id,
+        @Valid @RequestBody AvaliacaoDTO d,
+        Authentication a
+    ) {
         return service.avaliar(id, d, usuarios.atual(a.getName()));
     }
 

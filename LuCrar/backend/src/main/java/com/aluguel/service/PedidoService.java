@@ -16,25 +16,41 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
+
     private final PedidoRepository pedidos;
     private final ClienteRepository clientes;
     private final AutomovelRepository automoveis;
 
     public PedidoAluguel criar(PedidoDTO d, Usuario u) {
-        if (u.getPapel() != Papel.CLIENTE) throw erro(FORBIDDEN, "Apenas clientes introduzem pedidos");
+        if (u.getPapel() != Papel.CLIENTE) throw erro(
+            FORBIDDEN,
+            "Apenas clientes introduzem pedidos"
+        );
         var p = new PedidoAluguel();
-        p.setCliente(clientes.findByUsuario(u).orElseThrow(() -> erro(NOT_FOUND, "Cliente não cadastrado")));
+        p.setCliente(
+            clientes
+                .findByUsuario(u)
+                .orElseThrow(() -> erro(NOT_FOUND, "Cliente não cadastrado"))
+        );
         return pedidos.save(aplicar(p, d));
     }
 
     public List<PedidoAluguel> listar(Usuario u) {
         if (u.getPapel().isAgente()) return pedidos.findAll();
-        return clientes.findByUsuario(u).map(pedidos::findByCliente).orElse(List.of());
+        return clientes
+            .findByUsuario(u)
+            .map(pedidos::findByCliente)
+            .orElse(List.of());
     }
 
     public PedidoAluguel buscar(Long id, Usuario u) {
-        var p = pedidos.findById(id).orElseThrow(() -> erro(NOT_FOUND, "Pedido não encontrado"));
-        if (!u.getPapel().isAgente() && !p.getCliente().getUsuario().getId().equals(u.getId())) {
+        var p = pedidos
+            .findById(id)
+            .orElseThrow(() -> erro(NOT_FOUND, "Pedido não encontrado"));
+        if (
+            !u.getPapel().isAgente() &&
+            !p.getCliente().getUsuario().getId().equals(u.getId())
+        ) {
             throw erro(FORBIDDEN, "Acesso negado");
         }
         return p;
@@ -48,12 +64,27 @@ public class PedidoService {
         if (!u.getPapel().isAgente() && p.getStatus() != PENDENTE) {
             throw erro(CONFLICT, "Cliente só modifica pedidos pendentes");
         }
-        return pedidos.save(aplicar(p, d));
+        aplicar(p, d);
+        if (u.getPapel().isAgente() && p.getStatus() != PENDENTE) {
+            p.setStatus(PENDENTE);
+            p.setCredito(null);
+        }
+        return pedidos.save(p);
     }
 
     public PedidoAluguel cancelar(Long id, Usuario u) {
+        if (u.getPapel() != Papel.CLIENTE) {
+            throw erro(FORBIDDEN, "Apenas clientes podem cancelar pedidos");
+        }
         var p = buscar(id, u);
-        if (p.getStatus() == CONTRATADO) throw erro(CONFLICT, "Contrato já executado");
+        if (p.getStatus() == CONTRATADO) throw erro(
+            CONFLICT,
+            "Contrato já executado"
+        );
+        if (p.getStatus() == CANCELADO) throw erro(
+            CONFLICT,
+            "Pedido já cancelado"
+        );
         p.setStatus(CANCELADO);
         return pedidos.save(p);
     }
@@ -61,7 +92,19 @@ public class PedidoService {
     /** Análise financeira feita por um agente. */
     public PedidoAluguel avaliar(Long id, AvaliacaoDTO d, Usuario u) {
         var p = agentePedido(id, u, PENDENTE);
-        if (d.aprovado()) {
+        if (
+            d.valorCredito() != null &&
+            (u.getPapel() != Papel.BANCO || !Boolean.TRUE.equals(d.aprovado()))
+        ) {
+            throw erro(
+                BAD_REQUEST,
+                "Somente um banco pode conceder crédito ao aprovar um pedido"
+            );
+        }
+        if (d.valorCredito() != null && d.valorCredito().signum() <= 0) {
+            throw erro(BAD_REQUEST, "O valor do crédito deve ser positivo");
+        }
+        if (Boolean.TRUE.equals(d.aprovado())) {
             p.setStatus(APROVADO);
             if (u.getPapel() == Papel.BANCO && d.valorCredito() != null) {
                 var cc = new ContratoCredito();
@@ -82,17 +125,30 @@ public class PedidoService {
         return pedidos.save(p);
     }
 
-    private PedidoAluguel agentePedido(Long id, Usuario u, StatusPedido esperado) {
+    private PedidoAluguel agentePedido(
+        Long id,
+        Usuario u,
+        StatusPedido esperado
+    ) {
         if (!u.getPapel().isAgente()) throw erro(FORBIDDEN, "Apenas agentes");
         var p = buscar(id, u);
-        if (p.getStatus() != esperado) throw erro(CONFLICT, "Pedido deve estar " + esperado);
+        if (p.getStatus() != esperado) throw erro(
+            CONFLICT,
+            "Pedido deve estar " + esperado
+        );
         return p;
     }
 
     private PedidoAluguel aplicar(PedidoAluguel p, PedidoDTO d) {
-        if (d.dataFim().isBefore(d.dataInicio())) throw erro(BAD_REQUEST, "Data final anterior à inicial");
-        p.setAutomovel(automoveis.findById(d.automovelId())
-                .orElseThrow(() -> erro(NOT_FOUND, "Automóvel não encontrado")));
+        if (!d.dataFim().isAfter(d.dataInicio())) throw erro(
+            BAD_REQUEST,
+            "A data final deve ser posterior à inicial"
+        );
+        p.setAutomovel(
+            automoveis
+                .findById(d.automovelId())
+                .orElseThrow(() -> erro(NOT_FOUND, "Automóvel não encontrado"))
+        );
         p.setDataInicio(d.dataInicio());
         p.setDataFim(d.dataFim());
         return p;

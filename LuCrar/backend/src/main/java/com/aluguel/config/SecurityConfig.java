@@ -24,14 +24,26 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(c -> c.disable())
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(a -> a
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        .anyRequest().authenticated())
-                // 401 sem WWW-Authenticate: evita o pop-up de login do navegador
-                .httpBasic(b -> b.authenticationEntryPoint((req, res, ex) -> res.sendError(401, "Não autenticado")))
-                .build();
+            .csrf(c -> c.disable())
+            .sessionManagement(s ->
+                s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(a ->
+                a
+                    .requestMatchers(HttpMethod.POST, "/api/auth/register")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/health")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            )
+            // 401 sem WWW-Authenticate: evita o pop-up de login do navegador
+            .httpBasic(b ->
+                b.authenticationEntryPoint((req, res, ex) ->
+                    res.sendError(401, "Não autenticado")
+                )
+            )
+            .build();
     }
 
     @Bean
@@ -41,8 +53,15 @@ public class SecurityConfig {
 
     @Bean
     UserDetailsService userDetailsService(UsuarioRepository repo) {
-        return login -> repo.findByLogin(login)
-                .map(u -> User.withUsername(u.getLogin()).password(u.getSenha()).roles(u.getPapel().name()).build())
+        return login ->
+            repo
+                .findByLogin(login)
+                .map(u ->
+                    User.withUsername(u.getLogin())
+                        .password(u.getSenha())
+                        .roles(u.getPapel().name())
+                        .build()
+                )
                 .orElseThrow(() -> new UsernameNotFoundException(login));
     }
 
@@ -51,8 +70,11 @@ public class SecurityConfig {
     CommandLineRunner dadosIniciais(AutomovelRepository repo) {
         return args -> {
             if (repo.count() > 0) return;
-            String[][] carros = {{"Fiat", "Argo", "2023", "ABC1D23"}, {"VW", "Polo", "2024", "BRA2E19"},
-                    {"Chevrolet", "Onix", "2022", "QWE3F45"}};
+            String[][] carros = {
+                { "Fiat", "Argo", "2023", "ABC1D23" },
+                { "VW", "Polo", "2024", "BRA2E19" },
+                { "Chevrolet", "Onix", "2022", "QWE3F45" },
+            };
             int i = 1;
             for (var c : carros) {
                 var a = new Automovel();

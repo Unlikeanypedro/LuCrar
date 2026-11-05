@@ -121,28 +121,37 @@ npm run dev
 
 🎨 http://localhost:5173
 
-### 🐳 Docker (execução remota)
+### 🐳 Docker
 
-A configuração Docker publica o React por Nginx, encaminha `/api` para o Spring Boot e usa Caddy para HTTPS automático. O banco continua no Supabase; as credenciais ficam apenas nas variáveis do container do back-end.
+O frontend React é servido pelo Nginx, que encaminha `/api` ao Spring Boot. O banco continua no Supabase; as credenciais ficam somente no container do backend.
 
-Pré-requisitos: Docker Engine com Docker Compose v2 e um projeto Supabase PostgreSQL. Na raiz deste projeto, crie `.env` a partir de `.env.example` e configure `DB_URL`, `DB_USER`, `DB_PASSWORD` e `AGENT_REGISTRATION_KEY`. Para execução remota, defina também `DOMAIN` com um domínio cujo DNS aponte para o servidor; libere as portas TCP 80/443 e UDP 443. Caddy solicitará e renovará o certificado TLS automaticamente. Para teste local, o domínio padrão é `localhost`.
+Configure Docker Engine com Docker Compose v2 e um projeto Supabase PostgreSQL. Na raiz deste projeto, copie `.env.example` para `.env` e preencha `DB_URL`, `DB_USER`, `DB_PASSWORD` e `AGENT_REGISTRATION_KEY`.
+
+**Acesso local — porta 3000:**
 
 ```bash
 cp .env.example .env
-# Edite .env com as credenciais reais e, no servidor, DOMAIN=seu-dominio.example
-
 docker compose up -d --build
 docker compose ps
 ```
 
-Acesse `https://seu-dominio.example` (ou `https://localhost` no teste local). A saúde da API fica disponível em `/api/health`. Para acompanhar os serviços e encerrar a aplicação:
+Abra `http://localhost:3000`; a saúde da API pode ser conferida em `http://localhost:3000/api/health`.
+
+**Execução remota com HTTPS:** defina `DOMAIN` no `.env` com um domínio cujo DNS aponte para o servidor. Libere TCP 80/443 e UDP 443. Caddy solicita e renova o certificado TLS automaticamente.
+
+```bash
+docker compose --profile remote up -d --build
+docker compose ps
+```
+
+Acesse `https://seu-dominio.example`. O backend não é publicado diretamente; no acesso remoto, somente o proxy HTTPS fica exposto. Para acompanhar os serviços e encerrar:
 
 ```bash
 docker compose logs -f
 docker compose down
 ```
 
-Não versione o arquivo `.env`. Para atualizar após publicar alterações, execute `docker compose up -d --build` novamente. O serviço `backend` não é exposto diretamente à Internet; somente o proxy HTTPS publica portas.
+Não versione o arquivo `.env`. Para atualizar após publicar alterações, execute novamente o comando `docker compose up -d --build` correspondente ao tipo de execução.
 
 ### 🚀 Build de produção
 

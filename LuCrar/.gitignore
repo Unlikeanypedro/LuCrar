@@ -1,0 +1,17 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Build artifacts
+backend/target/
+frontend/node_modules/
+frontend/dist/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/

@@ -29,20 +29,20 @@ export default function Clientes({ user, onExcluidoProprio }) {
   };
 
   return (
-    <div className="card">
-      <h2>Clientes</h2>
+    <><div className="page-heading"><div><h1>{user.papel === 'CLIENTE' ? 'Meu cadastro' : 'Clientes'}</h1><p>{user.papel === 'CLIENTE' ? 'Mantenha seus dados atualizados.' : 'Consulte e atualize os dados dos clientes.'}</p></div></div><div className="card">
+      <h2>{user.papel === 'CLIENTE' ? 'Dados pessoais' : 'Cadastro de clientes'}</h2>
       {erro && <p className="erro">{erro}</p>}
-      <table>
+      <div className="table-wrap"><table>
         <thead><tr><th>Nome</th><th>CPF</th><th>Profissão</th><th></th></tr></thead>
         <tbody>
           {lista.map(c => (
             <tr key={c.id}>
               <td>{c.nome}</td><td>{c.cpf}</td><td>{c.profissao}</td>
-              <td><button onClick={() => setEdit(c)}>Editar</button><button onClick={() => excluir(c)}>Excluir</button></td>
+              <td><div className="actions"><button className="secondary" onClick={() => setEdit(c)}>Editar</button><button className="danger" onClick={() => excluir(c)}>Excluir</button></div></td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </table>{lista.length === 0 && <div className="empty-state">Nenhum cliente encontrado.</div>}</div>
       {edit && (
         <div>
           <h3>Editar #{edit.id}</h3>
@@ -64,6 +64,6 @@ export default function Clientes({ user, onExcluidoProprio }) {
           <div><button onClick={salvar}>Salvar</button><button onClick={() => setEdit(null)}>Cancelar</button></div>
         </div>
       )}
-    </div>
+    </div></>
   );
 }

@@ -7,7 +7,12 @@ import Clientes from './Clientes.jsx';
 export default function App() {
   const [user, setUser] = useState(null);
   const [aba, setAba] = useState('pedidos');
-  useEffect(() => { if (logado()) api('/auth/me').then(setUser).catch(() => clearAuth()); }, []);
+  useEffect(() => {
+    const onAuthExpired = () => setUser(null);
+    window.addEventListener('auth-expired', onAuthExpired);
+    if (logado()) api('/auth/me').then(setUser).catch(() => clearAuth());
+    return () => window.removeEventListener('auth-expired', onAuthExpired);
+  }, []);
   if (!user) return <Login onLogin={setUser} />;
 
   const sair = () => { clearAuth(); setUser(null); };

@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import java.util.UUID;
 
 /** Login obrigatório (usuário e senha via HTTP Basic, senha com BCrypt). Só o cadastro é público. */
 @Configuration
@@ -52,13 +53,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    UserDetailsService userDetailsService(UsuarioRepository repo) {
+    UserDetailsService userDetailsService(
+        UsuarioRepository repo,
+        PasswordEncoder passwordEncoder
+    ) {
+        // Old rows can have no password after the compatibility migration. Give
+        // them a random, unshared hash so Basic auth fails cleanly instead of
+        // throwing while Spring builds UserDetails with a null password.
+        String unusableLegacyPassword = passwordEncoder.encode(UUID.randomUUID().toString());
         return login ->
             repo
                 .findByLogin(login)
                 .map(u ->
                     User.withUsername(u.getLogin())
-                        .password(u.getSenha())
+                        .password(u.getSenha() == null ? unusableLegacyPassword : u.getSenha())
                         .roles(u.getPapel().name())
                         .build()
                 )

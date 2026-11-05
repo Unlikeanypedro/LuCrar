@@ -148,6 +148,24 @@ class FluxoAluguelTest {
     }
 
     @Test
+    void rgEhOpcionalNoCadastroDoCliente() throws Exception {
+        mvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"login":"sem-rg","senha":"senha123","papel":"CLIENTE",
+                     "cliente":{"nome":"Teste","cpf":"456",
+                                  "endereco":"Rua A","profissao":"Dev"}}
+                    """
+                )
+        ).andExpect(status().isCreated());
+        mvc.perform(get("/api/auth/me").with(httpBasic("sem-rg", "senha123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.papel").value("CLIENTE"));
+    }
+
+    @Test
     void rendimentoLimiteTres() throws Exception {
         mvc.perform(
             post("/api/auth/register")

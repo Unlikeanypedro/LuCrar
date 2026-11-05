@@ -17,10 +17,10 @@ public class Usuario {
     private String login;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(nullable = false)
+    @Column(name = "senha_hash", nullable = false)
     private String senha;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "perfil", nullable = false)
     private Papel papel;
 }

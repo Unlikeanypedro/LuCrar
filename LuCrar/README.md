@@ -45,7 +45,7 @@ Contexto: trabalho acadêmico (Laboratório 02, 15 pontos), com modelagem UML al
 ## ✨ Funcionalidades Principais
 
 - 🔐 **Autenticação:** cadastro e login obrigatórios (usuário e senha, BCrypt); papéis `CLIENTE`, `EMPRESA`, `BANCO`.
-- 👤 **CRUD de cliente:** RG, CPF, nome, endereço, profissão e até 3 rendimentos (empregador + valor).
+- 👤 **CRUD de cliente:** CPF, nome, endereço, profissão e até 3 rendimentos (empregador + valor); RG opcional.
 - 📄 **Pedidos de aluguel:** criar, modificar, consultar e cancelar (cliente); avaliar e executar contrato (agente).
 - 💳 **Contrato de crédito:** concedido por um banco agente ao aprovar o pedido.
 - 🚘 **Automóveis:** matrícula, ano, marca, modelo, placa e proprietário (cliente, empresa ou banco).

@@ -61,7 +61,9 @@ public class ClienteService {
 
     private Cliente aplicar(Cliente c, ClienteDTO d) {
         c.setNome(d.nome());
-        c.setRg(d.rg());
+        // Some deployed schemas still constrain `rg` to NOT NULL. Keep the
+        // field optional at the API while storing an empty value for those DBs.
+        c.setRg(d.rg() == null ? "" : d.rg());
         c.setCpf(d.cpf());
         c.setEndereco(d.endereco());
         c.setProfissao(d.profissao());

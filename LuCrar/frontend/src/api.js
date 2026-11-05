@@ -18,6 +18,10 @@ export async function api(path, method = 'GET', body) {
     headers: { 'Content-Type': 'application/json', ...(auth && { Authorization: auth }) },
     body: body && JSON.stringify(body),
   });
+  if (r.status === 401) {
+    clearAuth();
+    window.dispatchEvent(new Event('auth-expired'));
+  }
   if (!r.ok) {
     const e = await r.json().catch(() => ({}));
     throw new Error(e.message || e.error || `Erro ${r.status}`);

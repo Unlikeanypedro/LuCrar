@@ -21,7 +21,7 @@ public final class Dtos {
 
     public record ClienteDTO(
         @NotBlank String nome,
-        @NotBlank String rg,
+        String rg,
         @NotBlank String cpf,
         @NotBlank String endereco,
         @NotBlank String profissao,

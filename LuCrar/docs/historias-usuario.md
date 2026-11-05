@@ -2,7 +2,7 @@
 
 | ID | Como... | Quero... | Para... | Critérios de aceite |
 |---|---|---|---|---|
-| HU01 | visitante | me cadastrar com usuário e senha (cliente ou agente) | usar o sistema | login único; cliente informa RG, CPF, nome, endereço, profissão e até 3 rendimentos |
+| HU01 | visitante | me cadastrar com usuário e senha (cliente ou agente) | usar o sistema | login único; cliente informa CPF, nome, endereço, profissão e até 3 rendimentos; RG é opcional; agente informa a chave de cadastro |
 | HU02 | usuário cadastrado | fazer login | acessar o sistema | sem login, toda a API retorna 401; senha armazenada com BCrypt |
 | HU03 | cliente | consultar, editar e excluir meu cadastro | manter meus dados atualizados | cliente só acessa o próprio cadastro; no máximo 3 rendimentos |
 | HU04 | cliente | introduzir um pedido de aluguel | alugar um automóvel | escolho automóvel e período; pedido nasce `PENDENTE` |

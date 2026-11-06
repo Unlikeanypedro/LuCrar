@@ -1,0 +1,65 @@
+name: lucrar-dev
+
+services:
+    backend:
+        build:
+            context: ./backend
+            dockerfile: Dockerfile.dev
+        restart: unless-stopped
+        environment:
+            SERVER_PORT: 8080
+            SPRING_PROFILES_ACTIVE: dev
+            APP_DEMO_ACCOUNTS_ENABLED: "true"
+            DB_URL: ${DB_URL:?Set DB_URL in .env}
+            DB_USER: ${DB_USER:?Set DB_USER in .env}
+            DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+            DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-5}
+            AGENT_REGISTRATION_KEY: ${AGENT_REGISTRATION_KEY:-chave-local-agente}
+        ports:
+            - "8080:8080"
+        networks:
+            - app
+        develop:
+            watch:
+                - action: sync+restart
+                  path: ./backend/src
+                  target: /app/src
+                - action: rebuild
+                  path: ./backend/pom.xml
+                - action: rebuild
+                  path: ./backend/Dockerfile.dev
+
+    frontend:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile.dev
+        restart: unless-stopped
+        environment:
+            VITE_API_URL: http://backend:8080
+        depends_on:
+            - backend
+        ports:
+            - "5173:5173"
+        networks:
+            - app
+        develop:
+            watch:
+                - action: sync
+                  path: ./frontend/src
+                  target: /app/src
+                - action: sync
+                  path: ./frontend/index.html
+                  target: /app/index.html
+                - action: sync+restart
+                  path: ./frontend/vite.config.js
+                  target: /app/vite.config.js
+                - action: rebuild
+                  path: ./frontend/package.json
+                - action: rebuild
+                  path: ./frontend/package-lock.json
+                - action: rebuild
+                  path: ./frontend/Dockerfile.dev
+
+networks:
+    app:
+        driver: bridge

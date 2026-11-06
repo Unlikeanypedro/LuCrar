@@ -29,6 +29,10 @@ public class PedidoAluguel {
     @Enumerated(EnumType.STRING)
     private StatusPedido status = StatusPedido.PENDENTE;
 
+    /** ID do agente (tabela agente) que assumiu a análise; nulo na fila aberta. */
+    @Column(name = "agente_id")
+    private Long agenteId;
+
     /** Opcional: contrato de crédito concedido por um banco agente. */
     @OneToOne(cascade = CascadeType.ALL)
     private ContratoCredito credito;

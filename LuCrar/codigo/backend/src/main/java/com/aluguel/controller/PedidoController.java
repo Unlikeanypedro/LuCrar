@@ -63,6 +63,11 @@ public class PedidoController {
         return service.avaliar(id, d, usuarios.atual(a.getName()));
     }
 
+    @PostMapping("/{id}/assumir")
+    public PedidoAluguel assumir(@PathVariable Long id, Authentication a) {
+        return service.assumir(id, usuarios.atual(a.getName()));
+    }
+
     @PostMapping("/{id}/contrato")
     public PedidoAluguel contratar(@PathVariable Long id, Authentication a) {
         return service.contratar(id, usuarios.atual(a.getName()));

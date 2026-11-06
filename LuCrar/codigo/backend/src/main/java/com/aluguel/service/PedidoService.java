@@ -23,6 +23,7 @@ public class PedidoService {
     private final PedidoRepository pedidos;
     private final ClienteRepository clientes;
     private final AutomovelRepository automoveis;
+    private final AgenteRepository agentes;
 
     public PedidoAluguel criar(PedidoDTO d, Usuario u) {
         if (u.getPapel() != Papel.CLIENTE) throw erro(
@@ -39,7 +40,14 @@ public class PedidoService {
     }
 
     public List<PedidoAluguel> listar(Usuario u) {
-        if (u.getPapel().isAgente()) return pedidos.findAll();
+        if (u.getPapel().isAgente()) {
+            Long agenteId = agentes.findByUsuarioId(u.getId())
+                .map(Agente::getId)
+                .orElse(null);
+            return agenteId == null
+                ? pedidos.findByStatusOrderByIdDesc(PENDENTE)
+                : pedidos.findByStatusOrAgenteIdOrderByIdDesc(PENDENTE, agenteId);
+        }
         return clientes
             .findByUsuario(u)
             .map(pedidos::findByCliente)
@@ -61,6 +69,7 @@ public class PedidoService {
 
     public PedidoAluguel modificar(Long id, PedidoDTO d, Usuario u) {
         var p = buscar(id, u);
+        if (u.getPapel().isAgente()) validarAgenteResponsavel(p, u);
         if (p.getStatus() == CANCELADO || p.getStatus() == CONTRATADO) {
             throw erro(CONFLICT, "Pedido não pode mais ser modificado");
         }
@@ -94,7 +103,16 @@ public class PedidoService {
 
     /** Análise financeira feita por um agente. */
     public PedidoAluguel avaliar(Long id, AvaliacaoDTO d, Usuario u) {
-        var p = agentePedido(id, u, PENDENTE);
+        exigirAgente(u);
+        var p = pedidos.findById(id).orElseThrow(() -> erro(NOT_FOUND, "Pedido não encontrado"));
+        if (p.getStatus() == PENDENTE) {
+            assumirSeLivre(p, u);
+            p.setStatus(EM_ANALISE);
+        } else if (p.getStatus() == EM_ANALISE) {
+            validarAgenteResponsavel(p, u);
+        } else {
+            throw erro(CONFLICT, "Pedido deve estar PENDENTE ou EM_ANALISE");
+        }
         if (
             d.valorCredito() != null &&
             (u.getPapel() != Papel.BANCO || !Boolean.TRUE.equals(d.aprovado()))
@@ -116,7 +134,7 @@ public class PedidoService {
                 p.setCredito(cc);
             }
         } else {
-            p.setStatus(REJEITADO);
+            p.setStatus(REPROVADO);
         }
         return pedidos.save(p);
     }
@@ -124,7 +142,18 @@ public class PedidoService {
     /** Execução do contrato após parecer positivo. */
     public PedidoAluguel contratar(Long id, Usuario u) {
         var p = agentePedido(id, u, APROVADO);
+        validarAgenteResponsavel(p, u);
         p.setStatus(CONTRATADO);
+        return pedidos.save(p);
+    }
+
+    /** Assume um pedido pendente para impedir duas empresas de analisarem ao mesmo tempo. */
+    public PedidoAluguel assumir(Long id, Usuario u) {
+        exigirAgente(u);
+        var p = pedidos.findById(id).orElseThrow(() -> erro(NOT_FOUND, "Pedido não encontrado"));
+        if (p.getStatus() != PENDENTE) throw erro(CONFLICT, "Somente pedidos pendentes podem ser assumidos");
+        assumirSeLivre(p, u);
+        p.setStatus(EM_ANALISE);
         return pedidos.save(p);
     }
 
@@ -133,13 +162,38 @@ public class PedidoService {
         Usuario u,
         StatusPedido esperado
     ) {
-        if (!u.getPapel().isAgente()) throw erro(FORBIDDEN, "Apenas agentes");
+        exigirAgente(u);
         var p = buscar(id, u);
         if (p.getStatus() != esperado) throw erro(
             CONFLICT,
             "Pedido deve estar " + esperado
         );
         return p;
+    }
+
+    private void exigirAgente(Usuario u) {
+        if (!u.getPapel().isAgente()) throw erro(FORBIDDEN, "Apenas agentes");
+    }
+
+    private Long idAgente(Usuario u) {
+        return agentes.findByUsuarioId(u.getId())
+            .map(Agente::getId)
+            .orElseThrow(() -> erro(NOT_FOUND, "Cadastro de agente não encontrado"));
+    }
+
+    private void assumirSeLivre(PedidoAluguel p, Usuario u) {
+        Long agenteId = idAgente(u);
+        if (p.getAgenteId() != null && !p.getAgenteId().equals(agenteId)) {
+            throw erro(FORBIDDEN, "Este pedido já está em análise por outro agente");
+        }
+        p.setAgenteId(agenteId);
+    }
+
+    private void validarAgenteResponsavel(PedidoAluguel p, Usuario u) {
+        Long agenteId = idAgente(u);
+        if (p.getAgenteId() == null || !p.getAgenteId().equals(agenteId)) {
+            throw erro(FORBIDDEN, "Somente o agente responsável pode tratar este pedido");
+        }
     }
 
     private PedidoAluguel aplicar(PedidoAluguel p, PedidoDTO d) {
@@ -152,7 +206,7 @@ public class PedidoService {
                 .findById(d.automovelId())
                 .orElseThrow(() -> erro(NOT_FOUND, "Automóvel não encontrado"))
         );
-        var statusesQueOcupamVeiculo = List.of(PENDENTE, APROVADO, CONTRATADO);
+        var statusesQueOcupamVeiculo = List.of(PENDENTE, EM_ANALISE, APROVADO, CONTRATADO);
         long conflitos = p.getId() == null
             ? pedidos.contarConflitosDePeriodo(
                 p.getAutomovel().getId(),

@@ -23,7 +23,7 @@ export default function Pedidos({
     const agente = user.papel !== "CLIENTE";
     const pendentes = pedidos.filter((p) => p.status === "PENDENTE").length;
     const ativos = pedidos.filter(
-        (p) => !["CANCELADO", "CONTRATADO", "REJEITADO"].includes(p.status),
+        (p) => !["CANCELADO", "CONTRATADO", "REJEITADO", "REPROVADO"].includes(p.status),
     ).length;
     const carroSelecionado = carros.find(
         (carro) => String(carro.id) === String(f.automovelId),
@@ -105,6 +105,8 @@ export default function Pedidos({
             }),
         );
     };
+
+    const assumir = (p) => acao(() => api(`/pedidos/${p.id}/assumir`, "POST"));
 
     return (
         <>
@@ -324,6 +326,12 @@ export default function Pedidos({
                                                 )}
                                             {agente &&
                                                 p.status === "PENDENTE" && (
+                                                    <button onClick={() => assumir(p)}>
+                                                        Assumir análise
+                                                    </button>
+                                                )}
+                                            {agente &&
+                                                p.status === "EM_ANALISE" && (
                                                     <>
                                                         <button
                                                             onClick={() =>

@@ -12,6 +12,13 @@ import org.springframework.data.repository.query.Param;
 public interface PedidoRepository extends JpaRepository<PedidoAluguel, Long> {
     List<PedidoAluguel> findByCliente(Cliente cliente);
 
+    List<PedidoAluguel> findByStatusOrderByIdDesc(StatusPedido status);
+
+    List<PedidoAluguel> findByStatusOrAgenteIdOrderByIdDesc(
+        StatusPedido status,
+        Long agenteId
+    );
+
     void deleteByCliente(Cliente cliente);
 
     @Query("""

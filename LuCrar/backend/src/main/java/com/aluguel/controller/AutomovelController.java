@@ -96,9 +96,29 @@ public class AutomovelController {
         a.setMarca(dto.marca());
         a.setModelo(dto.modelo());
         a.setPlaca(dto.placa());
+        a.setValorDiaria(dto.valorDiaria());
         a.setProprietario(dto.proprietario());
         a.setProprietarioUsuario(proprietario);
         return toResposta(repo.save(a));
+    }
+
+    private Long idProprietario(Automovel a) {
+        if (
+            a.getProprietario() == Automovel.Proprietario.CLIENTE &&
+            a.getProprietarioClienteId() != null
+        ) {
+            return a.getProprietarioClienteId();
+        }
+        if (
+            (a.getProprietario() == Automovel.Proprietario.EMPRESA ||
+                a.getProprietario() == Automovel.Proprietario.BANCO) &&
+            a.getProprietarioAgenteId() != null
+        ) {
+            return a.getProprietarioAgenteId();
+        }
+        return a.getProprietarioUsuario() != null
+            ? a.getProprietarioUsuario().getId()
+            : null;
     }
 
     private AutomovelRespostaDTO toResposta(Automovel a) {
@@ -109,10 +129,9 @@ public class AutomovelController {
             a.getMarca(),
             a.getModelo(),
             a.getPlaca(),
+            a.getValorDiaria(),
             a.getProprietario(),
-            a.getProprietarioUsuario() != null
-                ? a.getProprietarioUsuario().getId()
-                : null
+            idProprietario(a)
         );
     }
 }

@@ -1,7 +1,14 @@
-import { useState } from 'react';
-import { api, clearAuth, setAuth } from './api.js';
+import { useState } from "react";
+import { api, clearAuth, setAuth } from "./api.js";
 
-const vazio = { nome: '', rg: '', cpf: '', endereco: '', profissao: '', rendimentos: [] };
+const vazio = {
+    nome: "",
+    rg: "",
+    cpf: "",
+    endereco: "",
+    profissao: "",
+    rendimentos: [],
+};
 export default function Login({ onLogin }) {
   const [cadastro, setCadastro] = useState(false);
   const [f, setF] = useState({ login: '', senha: '', papel: 'CLIENTE', codigoAgente: '', cliente: vazio });

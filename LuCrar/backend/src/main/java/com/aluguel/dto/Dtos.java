@@ -54,6 +54,7 @@ public final class Dtos {
         @NotBlank String marca,
         @NotBlank String modelo,
         @NotBlank String placa,
+        @NotNull @DecimalMin("0.01") BigDecimal valorDiaria,
         @NotNull Automovel.Proprietario proprietario,
         @NotNull Long proprietarioId
     ) {}
@@ -65,6 +66,7 @@ public final class Dtos {
         String marca,
         String modelo,
         String placa,
+        BigDecimal valorDiaria,
         Automovel.Proprietario proprietario,
         Long proprietarioId
     ) {}

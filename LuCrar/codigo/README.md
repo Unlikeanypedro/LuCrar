@@ -100,6 +100,15 @@ Veja [`.env.example`](./.env.example). Back-end (variáveis de ambiente do siste
 
 > As tabelas são criadas automaticamente na primeira execução (`ddl-auto=update`) e 3 automóveis de exemplo são inseridos.
 
+No Compose de desenvolvimento (`docker compose -f compose.dev.yaml up --build`), são criadas contas locais para demonstração:
+
+| Perfil | Usuário | Senha |
+| --- | --- | --- |
+| Empresa | `empresa-teste` | `EMPRESA` |
+| Banco | `banco-teste` | `BANCO` |
+
+Essas contas são inseridas somente com o perfil `dev` e `APP_DEMO_ACCOUNTS_ENABLED=true`; o Compose de produção não as habilita. No Compose local, novos agentes podem ser cadastrados informando nome, CNPJ e `AGENT_REGISTRATION_KEY` (ou `chave-local-agente` quando a variável não estiver definida). O perfil de acesso fica em `usuario.perfil` (`CLIENTE`/`AGENTE`), o tipo específico em `usuario.papel` (`CLIENTE`/`EMPRESA`/`BANCO`) e os dados cadastrais do agente em `agente`.
+
 ### ⚡ Como Executar
 
 **Terminal 1 — Back-end**

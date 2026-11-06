@@ -8,7 +8,10 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import com.aluguel.dto.Dtos.RegistroDTO;
 import com.aluguel.model.Papel;
+import com.aluguel.model.Perfil;
+import com.aluguel.model.Agente;
 import com.aluguel.model.Usuario;
+import com.aluguel.repository.AgenteRepository;
 import com.aluguel.repository.UsuarioRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -24,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class UsuarioService {
 
     private final UsuarioRepository usuarios;
+    private final AgenteRepository agentes;
     private final ClienteService clientes;
     private final PasswordEncoder encoder;
 
@@ -65,17 +69,28 @@ public class UsuarioService {
                     "Cadastro de agente não autorizado"
                 );
             }
+            if (d.agente() == null) {
+                throw new ResponseStatusException(BAD_REQUEST, "Dados da empresa ou banco são obrigatórios");
+            }
         }
 
         var u = new Usuario();
         u.setLogin(d.login());
         u.setSenha(encoder.encode(d.senha()));
         u.setPapel(d.papel());
+        u.setPerfil(d.papel() == Papel.CLIENTE ? Perfil.CLIENTE : Perfil.AGENTE);
 
         usuarios.save(u);
 
         if (d.papel() == Papel.CLIENTE) {
             clientes.criar(u, d.cliente());
+        } else {
+            var agente = new Agente();
+            agente.setUsuario(u);
+            agente.setTipo(d.papel());
+            agente.setNome(d.agente().nome());
+            agente.setCnpj(d.agente().cnpj());
+            agentes.save(agente);
         }
 
         return u;

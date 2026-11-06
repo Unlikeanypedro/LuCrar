@@ -40,7 +40,8 @@ class FluxoAluguelTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                    {"login":"%s","senha":"%s","papel":"%s","codigoAgente":"test-key"}
+                    {"login":"%s","senha":"%s","papel":"%s","codigoAgente":"test-key",
+                     "agente":{"nome":"Agente Teste","cnpj":"12345678000190"}}
                     """.formatted(login, senha, papel)
                 )
         ).andExpect(status().isCreated());

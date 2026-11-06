@@ -18,7 +18,6 @@ export default function Catalogo({ user, onSolicitar }) {
   const [formAberto, setFormAberto] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [novoCarro, setNovoCarro] = useState({
-    matricula: '',
     ano: '',
     marca: '',
     modelo: '',
@@ -56,7 +55,7 @@ export default function Catalogo({ user, onSolicitar }) {
         proprietarioId: user.id,
       });
       setCarros((lista) => [criado, ...lista]);
-      setNovoCarro({ matricula: '', ano: '', marca: '', modelo: '', placa: '', valorDiaria: '' });
+      setNovoCarro({ ano: '', marca: '', modelo: '', placa: '', valorDiaria: '' });
       setFormAberto(false);
       setMensagem('Automóvel cadastrado e disponível no catálogo.');
     } catch (e) {
@@ -102,7 +101,6 @@ export default function Catalogo({ user, onSolicitar }) {
           <h2>Cadastrar automóvel para aluguel</h2>
           <p>O veículo ficará vinculado à sua conta e aparecerá no catálogo.</p>
           <form className="catalog-register-form" onSubmit={cadastrarCarro}>
-            <label>Matrícula<input required maxLength={120} value={novoCarro.matricula} onChange={(e) => setNovoCarro({ ...novoCarro, matricula: e.target.value })} /></label>
             <label>Ano<input required type="number" min="1886" max={new Date().getFullYear() + 1} value={novoCarro.ano} onChange={(e) => setNovoCarro({ ...novoCarro, ano: e.target.value })} /></label>
             <label>Marca<input required value={novoCarro.marca} onChange={(e) => setNovoCarro({ ...novoCarro, marca: e.target.value })} /></label>
             <label>Modelo<input required value={novoCarro.modelo} onChange={(e) => setNovoCarro({ ...novoCarro, modelo: e.target.value })} /></label>

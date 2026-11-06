@@ -8,10 +8,13 @@ services:
         restart: unless-stopped
         environment:
             SERVER_PORT: 8080
+            SPRING_PROFILES_ACTIVE: dev
+            APP_DEMO_ACCOUNTS_ENABLED: "true"
             DB_URL: ${DB_URL:?Set DB_URL in .env}
             DB_USER: ${DB_USER:?Set DB_USER in .env}
             DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
-            AGENT_REGISTRATION_KEY: ${AGENT_REGISTRATION_KEY:?Set AGENT_REGISTRATION_KEY in .env}
+            DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-5}
+            AGENT_REGISTRATION_KEY: ${AGENT_REGISTRATION_KEY:-chave-local-agente}
         ports:
             - "127.0.0.1:8080:8080"
         networks:

@@ -3,9 +3,16 @@ package com.aluguel.config;
 import com.aluguel.model.Automovel;
 import com.aluguel.repository.AutomovelRepository;
 import com.aluguel.repository.UsuarioRepository;
+import com.aluguel.model.Papel;
+import com.aluguel.model.Perfil;
+import com.aluguel.model.Usuario;
+import com.aluguel.model.Agente;
+import com.aluguel.repository.AgenteRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -68,6 +75,7 @@ public class SecurityConfig {
                     User.withUsername(u.getLogin())
                         .password(u.getSenha() == null ? unusableLegacyPassword : u.getSenha())
                         .roles(u.getPapel().name())
+                        .disabled(!u.isAtivo())
                         .build()
                 )
                 .orElseThrow(() -> new UsernameNotFoundException(login));
@@ -94,5 +102,49 @@ public class SecurityConfig {
                 repo.save(a);
             }
         };
+    }
+
+    /** Contas públicas de demonstração, habilitadas somente no Compose de desenvolvimento. */
+    @Bean
+    @Profile("dev")
+    CommandLineRunner contasDemonstracao(
+        UsuarioRepository usuarios,
+        AgenteRepository agentes,
+        PasswordEncoder passwordEncoder,
+        @Value("${app.demo-accounts.enabled:false}") boolean enabled
+    ) {
+        return args -> {
+            if (!enabled) return;
+            criarContaDemo(usuarios, agentes, passwordEncoder, "empresa-teste", "EMPRESA", Papel.EMPRESA, "Empresa Demonstração", "00000000000001");
+            criarContaDemo(usuarios, agentes, passwordEncoder, "banco-teste", "BANCO", Papel.BANCO, "Banco Demonstração", "00000000000002");
+        };
+    }
+
+    private void criarContaDemo(
+        UsuarioRepository usuarios,
+        AgenteRepository agentes,
+        PasswordEncoder passwordEncoder,
+        String login,
+        String senha,
+        Papel papel,
+        String nome,
+        String cnpj
+    ) {
+        var usuario = usuarios.findByLogin(login).orElseGet(() -> {
+            var novo = new Usuario();
+            novo.setLogin(login);
+            novo.setSenha(passwordEncoder.encode(senha));
+            novo.setPapel(papel);
+            novo.setPerfil(Perfil.AGENTE);
+            return usuarios.save(novo);
+        });
+        if (agentes.findByUsuarioId(usuario.getId()).isEmpty()) {
+            var agente = new Agente();
+            agente.setUsuario(usuario);
+            agente.setTipo(papel);
+            agente.setNome(nome);
+            agente.setCnpj(cnpj);
+            agentes.save(agente);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.aluguel.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,18 @@ public class Usuario {
     private String senha;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "perfil", nullable = false)
+    @Column(name = "papel", nullable = false)
     private Papel papel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "perfil", nullable = false)
+    private Perfil perfil;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column(nullable = false)
+    private boolean ativo = true;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column(name = "criado_em", nullable = false)
+    private OffsetDateTime criadoEm = OffsetDateTime.now();
 }

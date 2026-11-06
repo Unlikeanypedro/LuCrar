@@ -11,10 +11,11 @@ const vazio = {
 };
 export default function Login({ onLogin }) {
   const [cadastro, setCadastro] = useState(false);
-  const [f, setF] = useState({ login: '', senha: '', papel: 'CLIENTE', codigoAgente: '', cliente: vazio });
+  const [f, setF] = useState({ login: '', senha: '', papel: 'CLIENTE', codigoAgente: '', cliente: vazio, agente: { nome: '', cnpj: '' } });
   const [erro, setErro] = useState('');
   const set = (k, v) => setF({ ...f, [k]: v });
   const setC = (k, v) => setF({ ...f, cliente: { ...f.cliente, [k]: v } });
+  const setA = (k, v) => setF({ ...f, agente: { ...f.agente, [k]: v } });
   const entrar = async () => {
     setErro(''); setAuth(f.login, f.senha);
     try { onLogin(await api('/auth/me')); } catch { clearAuth(); setErro('Não foi possível entrar. Confira seu usuário e senha.'); }
@@ -26,8 +27,15 @@ export default function Login({ onLogin }) {
         ...f,
         cliente: f.papel === 'CLIENTE' ? f.cliente : null,
         codigoAgente: f.papel === 'CLIENTE' ? null : f.codigoAgente,
+        agente: f.papel === 'CLIENTE' ? null : f.agente,
       });
-      await entrar();
+      setAuth(f.login, f.senha);
+      try {
+        onLogin(await api('/auth/me'));
+      } catch {
+        clearAuth();
+        setErro('Cadastro salvo, mas o servidor recusou o login. Atualize o backend para aplicar a migração do perfil de agente e tente entrar novamente.');
+      }
     }
     catch (e) { setErro(e.message); }
   };
@@ -44,12 +52,18 @@ export default function Login({ onLogin }) {
         {cadastro && <>
           <label>Tipo de conta<select value={f.papel} onChange={e => set('papel', e.target.value)}><option value="CLIENTE">Cliente</option><option value="EMPRESA">Agente - Empresa</option><option value="BANCO">Agente - Banco</option></select></label>
           {f.papel === 'CLIENTE' && <div className="register-fields">{[['nome','Nome completo'],['rg','RG (opcional)'],['cpf','CPF'],['endereco','Endereço'],['profissao','Profissão']].map(([k,label]) => <input key={k} aria-label={label} placeholder={label} value={f.cliente[k]} onChange={e => setC(k, e.target.value)} required={k !== 'rg'} />)}</div>}
-          {f.papel !== 'CLIENTE' && <label>Chave de cadastro de agente<input autoComplete="off" placeholder="Chave fornecida pelo administrador" value={f.codigoAgente} onChange={e => set('codigoAgente', e.target.value)} required /></label>}
+          {f.papel !== 'CLIENTE' && <>
+            <label>Nome da empresa ou banco<input autoComplete="organization" placeholder="Razão social" value={f.agente.nome} onChange={e => setA('nome', e.target.value)} required /></label>
+            <label>CNPJ<input inputMode="numeric" autoComplete="off" placeholder="14 números, sem pontuação" maxLength={14} pattern="[0-9]{14}" value={f.agente.cnpj} onChange={e => setA('cnpj', e.target.value.replace(/\D/g, ''))} required /></label>
+            <label>Chave de cadastro de agente<input autoComplete="off" placeholder="Chave configurada pelo administrador" value={f.codigoAgente} onChange={e => set('codigoAgente', e.target.value)} required /></label>
+            <p className="login-hint">Para testar, use as contas prontas na tela de entrada. Cadastros novos de empresa e banco precisam da chave definida pelo administrador.</p>
+          </>}
         </>}
         {erro && <p className="erro" role="alert">{erro}</p>}
         <button type="submit">{cadastro ? 'Criar conta' : 'Entrar'} <span aria-hidden="true">→</span></button>
       </div>
       <div className="login-divider">ou</div>
+      {!cadastro && <p className="login-hint demo-logins"><strong>Acessos de demonstração (ambiente local)</strong><br />Empresa: <code>empresa-teste</code> / <code>EMPRESA</code><br />Banco: <code>banco-teste</code> / <code>BANCO</code></p>}
       <button type="button" className="login-toggle" onClick={() => { setCadastro(!cadastro); setErro(''); }}>{cadastro ? 'Já tem uma conta? Entrar' : 'Ainda não tem conta? Criar agora'}</button>
     </form></section>
   </div>;

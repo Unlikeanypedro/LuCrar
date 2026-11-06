@@ -3,6 +3,8 @@ package com.aluguel.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.Locale;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,4 +47,15 @@ public class Automovel {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Usuario proprietarioUsuario;
+
+    @PrePersist
+    private void gerarMatriculaSeNecessario() {
+        if (matricula == null || matricula.isBlank()) {
+            matricula = "MAT-" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8)
+                .toUpperCase(Locale.ROOT);
+        }
+    }
 }

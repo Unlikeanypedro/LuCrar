@@ -6,6 +6,7 @@ import com.aluguel.model.Automovel;
 import com.aluguel.model.Papel;
 import com.aluguel.model.Usuario;
 import com.aluguel.repository.AutomovelRepository;
+import com.aluguel.repository.AgenteRepository;
 import com.aluguel.repository.ClienteRepository;
 import com.aluguel.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/automoveis")
@@ -24,6 +26,7 @@ public class AutomovelController {
     private final AutomovelRepository repo;
     private final UsuarioService usuarios;
     private final ClienteRepository clientes;
+    private final AgenteRepository agentes;
 
     @GetMapping
     public List<AutomovelRespostaDTO> listar() {
@@ -32,17 +35,12 @@ public class AutomovelController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
     public AutomovelRespostaDTO criar(
         @Valid @RequestBody AutomovelDTO dto,
         Authentication auth
     ) {
         Usuario solicitante = usuarios.atual(auth.getName());
-        if (repo.existsByMatriculaIgnoreCase(dto.matricula())) {
-            throw new ResponseStatusException(
-                HttpStatus.CONFLICT,
-                "Matrícula já cadastrada"
-            );
-        }
         if (repo.existsByPlacaIgnoreCase(dto.placa())) {
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
@@ -105,12 +103,17 @@ public class AutomovelController {
                     )
                     .getId();
             } else {
-                proprietarioAgenteId = proprietario.getId();
+                proprietarioAgenteId = agentes
+                    .findByUsuarioId(proprietario.getId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Cadastro de agente não encontrado"
+                    ))
+                    .getId();
             }
         }
 
         var a = new Automovel();
-        a.setMatricula(dto.matricula());
         a.setAno(dto.ano());
         a.setMarca(dto.marca());
         a.setModelo(dto.modelo());
@@ -120,6 +123,8 @@ public class AutomovelController {
         a.setProprietarioClienteId(proprietarioClienteId);
         a.setProprietarioAgenteId(proprietarioAgenteId);
         a.setProprietarioUsuario(proprietario);
+        a = repo.save(a);
+        a.setMatricula("MAT-%04d".formatted(a.getId()));
         return toResposta(repo.save(a));
     }
 

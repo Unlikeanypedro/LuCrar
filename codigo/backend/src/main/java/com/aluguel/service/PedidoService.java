@@ -26,6 +26,7 @@ public class PedidoService {
     private final AutomovelRepository automoveis;
     private final AgenteRepository agentes;
     private final ContratoCreditoRepository creditos;
+    private final ContratoAluguelRepository contratos;
 
     public PedidoAluguel criar(PedidoDTO d, Usuario u) {
         if (u.getPapel() != Papel.CLIENTE) throw erro(
@@ -82,6 +83,9 @@ public class PedidoService {
         if (u.getPapel().isAgente() && p.getStatus() != PENDENTE) {
             p.setStatus(PENDENTE);
             p.setCredito(null);
+            p.setValorCreditoAprovado(null);
+            p.setTaxaJurosMensalAprovada(null);
+            p.setParcelasAprovadas(null);
             p.setParecerFinanceiro(null);
             p.setAgenteId(null);
         }
@@ -133,24 +137,52 @@ public class PedidoService {
         if (Boolean.TRUE.equals(d.aprovado())) {
             p.setStatus(APROVADO);
             if (u.getPapel() == Papel.BANCO && d.valorCredito() != null) {
-                var cc = new ContratoCredito();
-                cc.setBanco(agentes.findByUsuarioId(u.getId())
-                    .filter(agente -> agente.getTipo() == Papel.BANCO)
-                    .orElseThrow(() -> erro(NOT_FOUND, "Cadastro do banco não encontrado")));
-                cc.setValor(d.valorCredito());
-                p.setCredito(creditos.save(cc));
+                p.setValorCreditoAprovado(d.valorCredito());
+                p.setTaxaJurosMensalAprovada(d.taxaJurosMensal() != null
+                    ? d.taxaJurosMensal() : new BigDecimal("1.99"));
+                p.setParcelasAprovadas(d.parcelas() != null ? d.parcelas() : 6);
+            } else {
+                p.setValorCreditoAprovado(null);
+                p.setTaxaJurosMensalAprovada(null);
+                p.setParcelasAprovadas(null);
             }
         } else {
             p.setStatus(REPROVADO);
+            p.setValorCreditoAprovado(null);
+            p.setTaxaJurosMensalAprovada(null);
+            p.setParcelasAprovadas(null);
         }
         p.setParecerFinanceiro(d.parecerFinanceiro().trim());
         return pedidos.save(p);
     }
 
     /** Execução do contrato após parecer positivo. */
+    @Transactional
     public PedidoAluguel contratar(Long id, Usuario u) {
         var p = agentePedido(id, u, APROVADO);
         validarAgenteResponsavel(p, u);
+
+        var contrato = new ContratoAluguel();
+        contrato.setPedido(p);
+        contrato.setTipoPropriedade(p.getAutomovel().getProprietario());
+        contrato.setDataAssinatura(java.time.LocalDate.now());
+        contrato.setValorTotal(p.getValorTotal());
+        contrato.setStatus("ATIVO");
+        contrato = contratos.save(contrato);
+
+        if (p.getValorCreditoAprovado() != null) {
+            var banco = agentes.findByUsuarioId(u.getId())
+                .filter(agente -> agente.getTipo() == Papel.BANCO)
+                .orElseThrow(() -> erro(NOT_FOUND, "Cadastro do banco não encontrado"));
+            var credito = new ContratoCredito();
+            credito.setContratoAluguel(contrato);
+            credito.setBanco(banco);
+            credito.setValorFinanciado(p.getValorCreditoAprovado());
+            credito.setTaxaJurosMensal(p.getTaxaJurosMensalAprovada());
+            credito.setParcelas(p.getParcelasAprovadas());
+            p.setCredito(creditos.save(credito));
+        }
+        p.setContrato(contrato);
         p.setStatus(CONTRATADO);
         return pedidos.save(p);
     }

@@ -1,4 +1,4 @@
-# 🚗 LUCAR
+# 🚗 LUCRAR
 
 > [!NOTE]
 > Sistema web para **efetuar, modificar, consultar e cancelar pedidos de aluguel de automóveis**, com análise financeira por agentes (empresas e bancos) e execução de contrato. Laboratório 02 — DIAW, Engenharia de Software, PUC Minas.

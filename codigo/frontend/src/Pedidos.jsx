@@ -56,7 +56,7 @@ export default function Pedidos({
                 setCreditos((atuais) => Object.fromEntries(
                     dados
                         .filter((p) => p.status === "EM_ANALISE")
-                        .map((p) => [p.id, atuais[p.id] ?? p.credito?.valor?.toString() ?? ""]),
+                        .map((p) => [p.id, atuais[p.id] ?? p.valorCreditoAprovado?.toString() ?? ""]),
                 ));
             })
             .catch((e) => setErro(e.message));
@@ -316,8 +316,10 @@ export default function Pedidos({
                                     <td>{p.parecerFinanceiro || "—"}</td>
                                     <td>
                                         {p.credito
-                                            ? `R$ ${p.credito.valor} (${p.credito.banco.usuario.login})`
-                                            : "-"}
+                                            ? moeda(p.credito.valorFinanciado)
+                                            : p.valorCreditoAprovado != null
+                                                ? `${moeda(p.valorCreditoAprovado)} (aprovado)`
+                                                : "-"}
                                     </td>
                                     <td>
                                         {agente && p.status === "EM_ANALISE" && (

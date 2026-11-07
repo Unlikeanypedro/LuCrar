@@ -2,6 +2,7 @@ package com.aluguel.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,4 +41,17 @@ public class PedidoAluguel {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "credito_id")
     private ContratoCredito credito;
+
+    /** Terms are kept on the approved request until the rental contract is executed. */
+    @Column(name = "valor_credito_aprovado", precision = 12, scale = 2)
+    private BigDecimal valorCreditoAprovado;
+
+    @Column(name = "taxa_juros_mensal_aprovada", precision = 5, scale = 2)
+    private BigDecimal taxaJurosMensalAprovada;
+
+    @Column(name = "parcelas_aprovadas")
+    private Integer parcelasAprovadas;
+
+    @OneToOne(mappedBy = "pedido")
+    private ContratoAluguel contrato;
 }

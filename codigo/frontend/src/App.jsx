@@ -33,7 +33,11 @@ export default function App() {
         <div className="app-shell">
             <aside className="sidebar">
                 <div className="brand">
-                    <span className="brand-mark">L</span>
+                    <img
+                        className="brand-mark"
+                        src="/src/assets/lucrar-logo.svg"
+                        alt="LuCrar logo"
+                    />
                     <span>
                         LuCrar<small>MOBILITY</small>
                     </span>

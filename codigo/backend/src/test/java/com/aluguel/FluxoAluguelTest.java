@@ -88,10 +88,13 @@ class FluxoAluguelTest {
         )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("APROVADO"))
-            .andExpect(jsonPath("$.credito.valor").value(9000));
+            .andExpect(jsonPath("$.valorCreditoAprovado").value(9000));
         mvc.perform(
             post("/api/pedidos/1/contrato").with(httpBasic("banco", "senha123"))
-        ).andExpect(jsonPath("$.status").value("CONTRATADO"));
+        )
+            .andExpect(jsonPath("$.status").value("CONTRATADO"))
+            .andExpect(jsonPath("$.credito.valorFinanciado").value(9000))
+            .andExpect(jsonPath("$.contrato.status").value("ATIVO"));
 
         // senha nunca é exposta
         mvc.perform(

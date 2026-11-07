@@ -23,7 +23,7 @@ public class DatabaseCompatibilityConfig {
                 }
             }
 
-            for (String table : new String[] { "usuario", "agente", "automovel", "contrato_credito" }) {
+            for (String table : new String[] { "usuario", "agente", "automovel", "contrato_aluguel", "contrato_credito" }) {
                 String sequence = jdbc.queryForObject(
                     "SELECT pg_get_serial_sequence(?, 'id')",
                     String.class,

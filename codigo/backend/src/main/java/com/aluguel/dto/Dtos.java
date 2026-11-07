@@ -53,6 +53,8 @@ public final class Dtos {
     public record AvaliacaoDTO(
         @NotNull Boolean aprovado,
         @DecimalMin("0.01") BigDecimal valorCredito,
+        @DecimalMin("0.01") BigDecimal taxaJurosMensal,
+        @Min(1) Integer parcelas,
         @NotBlank @Size(max = 1000) String parecerFinanceiro
     ) {}
 

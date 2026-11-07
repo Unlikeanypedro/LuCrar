@@ -1,4 +1,8 @@
-# 🚗 LUCRAR
+<p align="center">   
+  <img width="64" height="64" alt="lucrar-logo" src="https://github.com/user-attachments/assets/2defa743-e73c-4aac-af03-0db7a5d1ba8f" />
+  <h1>LuCrar</h1>
+</p>
+
 
 > [!NOTE]
 > Sistema web para **efetuar, modificar, consultar e cancelar pedidos de aluguel de automóveis**, com análise financeira por agentes (empresas e bancos) e execução de contrato. Laboratório 02 — DIAW, Engenharia de Software, PUC Minas.

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: lucrar
+    runtime: docker
+    plan: free
+    rootDir: codigo
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: AGENT_REGISTRATION_KEY
+        sync: false

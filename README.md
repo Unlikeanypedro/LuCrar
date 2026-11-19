@@ -161,6 +161,25 @@ docker compose down
 
 Não versione o arquivo `.env`. Para atualizar após publicar alterações, execute novamente o comando `docker compose up -d --build` correspondente ao tipo de execução.
 
+### ☁️ Deploy no Render
+
+O Render **não executa `docker compose`**: ele constrói a imagem a partir de um `Dockerfile`. Por isso existe a imagem única [`codigo/Dockerfile`](./codigo/Dockerfile), que gera os estáticos do React, empacota o JAR do Spring Boot e sobe os dois no mesmo container (Nginx na porta `10000` encaminhando `/api` para a API em `8080`).
+
+**Opção 1 — Blueprint (recomendado):** em *New → Blueprint*, aponte para este repositório. O [`render.yaml`](./render.yaml) já cria o serviço com `Root Directory = codigo`, `Dockerfile Path = ./Dockerfile` e health check em `/api/health`; informe as variáveis `DB_URL`, `DB_USER`, `DB_PASSWORD` e `AGENT_REGISTRATION_KEY` quando solicitado.
+
+**Opção 2 — Serviço existente:** em *Settings → Build & Deploy*, ajuste:
+
+| Campo             | Valor         |
+| ----------------- | ------------- |
+| Language          | `Docker`      |
+| Root Directory    | `codigo`      |
+| Dockerfile Path   | `Dockerfile`  |
+| Health Check Path | `/api/health` |
+
+Em *Environment* cadastre `DB_URL`, `DB_USER`, `DB_PASSWORD` e `AGENT_REGISTRATION_KEY` (o banco continua no Supabase). Não é necessário definir `SERVER_PORT`: a API usa `8080` e o Nginx publica a porta `10000`.
+
+> O campo *Dockerfile Path* precisa apontar para `Dockerfile`. Se apontar para `compose.yaml`, o build falha com `unknown instruction: services:`.
+
 ### 🚀 Build de Produção
 
 ```bash
@@ -175,10 +194,13 @@ cd codigo/frontend && npm run build         # gera dist/
 ```
 .
 ├── README.md
+├── render.yaml                   # Blueprint do Render (imagem única)
 ├── codigo/
 │   ├── .env.example
 │   ├── .gitignore
 │   ├── Caddyfile
+│   ├── Dockerfile                # Imagem única (deploy em Render e afins)
+│   ├── deploy/                   # Nginx + script de start da imagem única
 │   ├── compose.yaml              # Produção
 │   ├── compose.dev.yaml          # Desenvolvimento (hot reload)
 │   ├── backend/                  # Spring Boot (MVC)

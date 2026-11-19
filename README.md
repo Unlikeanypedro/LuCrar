@@ -163,22 +163,33 @@ Não versione o arquivo `.env`. Para atualizar após publicar alterações, exec
 
 ### ☁️ Deploy no Render
 
-O Render **não executa `docker compose`**: ele constrói a imagem a partir de um `Dockerfile`. Por isso existe a imagem única [`codigo/Dockerfile`](./codigo/Dockerfile), que gera os estáticos do React, empacota o JAR do Spring Boot e sobe os dois no mesmo container (Nginx na porta `10000` encaminhando `/api` para a API em `8080`).
+O Render **não executa `docker compose`**: ele constrói a imagem a partir de um `Dockerfile`. Por isso existe a imagem única, que gera os estáticos do React, empacota o JAR do Spring Boot e sobe os dois no mesmo container (Nginx na porta `10000` encaminhando `/api` para a API em `8080`).
+
+Há dois arquivos equivalentes, um para cada valor de *Root Directory*:
+
+| Contexto                                          | Arquivo                                       |
+| ------------------------------------------------- | --------------------------------------------- |
+| Raiz do repositório (Root Directory vazio)         | [`Dockerfile`](./Dockerfile)                   |
+| `codigo` (Root Directory = `codigo`)               | [`codigo/Dockerfile`](./codigo/Dockerfile)     |
 
 **Opção 1 — Blueprint (recomendado):** em *New → Blueprint*, aponte para este repositório. O [`render.yaml`](./render.yaml) já cria o serviço com `Root Directory = codigo`, `Dockerfile Path = ./Dockerfile` e health check em `/api/health`; informe as variáveis `DB_URL`, `DB_USER`, `DB_PASSWORD` e `AGENT_REGISTRATION_KEY` quando solicitado.
 
 **Opção 2 — Serviço existente:** em *Settings → Build & Deploy*, ajuste:
 
-| Campo             | Valor         |
-| ----------------- | ------------- |
-| Language          | `Docker`      |
-| Root Directory    | `codigo`      |
-| Dockerfile Path   | `Dockerfile`  |
-| Health Check Path | `/api/health` |
+| Campo             | Valor                         |
+| ----------------- | ----------------------------- |
+| Language          | `Docker`                      |
+| Root Directory    | *(vazio — raiz do repositório)* |
+| Dockerfile Path   | `Dockerfile`                  |
+| Health Check Path | `/api/health`                 |
+
+Se preferir definir *Root Directory* = `codigo`, use o `Dockerfile Path` `Dockerfile` (o [`codigo/Dockerfile`](./codigo/Dockerfile) é equivalente para esse contexto).
 
 Em *Environment* cadastre `DB_URL`, `DB_USER`, `DB_PASSWORD` e `AGENT_REGISTRATION_KEY` (o banco continua no Supabase). Não é necessário definir `SERVER_PORT`: a API usa `8080` e o Nginx publica a porta `10000`.
 
 > O campo *Dockerfile Path* precisa apontar para `Dockerfile`. Se apontar para `compose.yaml`, o build falha com `unknown instruction: services:`.
+>
+> Se o log mostrar `load build context ... transferring context: 2B` e os `COPY` falharem com `not found`, o *Root Directory* está apontando para uma pasta vazia/errada: deixe-o vazio e use o `Dockerfile` da raiz.
 
 ### 🚀 Build de Produção
 

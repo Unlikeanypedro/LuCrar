@@ -43,6 +43,11 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/health")
                     .permitAll()
+                    // Sem isso, o forward para /error exige autenticação e
+                    // qualquer erro (validação, 500...) vira 401 — o front
+                    // interpreta 401 como senha errada.
+                    .requestMatchers("/error")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             )

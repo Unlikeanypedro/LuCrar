@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Ilustração de um automóvel SUV">
+  <rect width="640" height="360" fill="#F3F5F9" />
+  <circle cx="478" cy="92" r="130" fill="#DBEAFE" />
+  <circle cx="140" cy="300" r="76" fill="#E8EEF9" />
+  <ellipse cx="320" cy="318" rx="270" ry="14" fill="#DDE4EF" />
+  <path d="M166 310c28-36 70-52 118-52h72c48 0 90 16 118 52" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" />
+  <path d="M136 194c10-54 46-88 96-94h134c44 8 76 42 90 94H136z" fill="#14213D" />
+  <path d="M160 186c8-40 40-66 78-70h58v70H160z" fill="#DBEAFE" />
+  <path d="M316 116h42c34 4 62 32 74 70H316v-70z" fill="#DBEAFE" opacity=".85" />
+  <rect x="60" y="192" width="520" height="76" rx="24" fill="#14213D" />
+  <rect x="60" y="230" width="520" height="38" rx="18" fill="#2563EB" opacity=".16" />
+  <rect x="176" y="104" width="200" height="8" rx="4" fill="#22304F" />
+  <path d="M298 196v66" stroke="#0B1524" stroke-width="3" opacity=".35" />
+  <rect x="322" y="224" width="26" height="8" rx="4" fill="#DBEAFE" opacity=".9" />
+  <rect x="532" y="206" width="30" height="14" rx="7" fill="#F59E0B" />
+  <rect x="66" y="206" width="20" height="14" rx="7" fill="#B42318" />
+  <circle cx="182" cy="264" r="50" fill="#0B1524" />
+  <circle cx="182" cy="264" r="36" fill="none" stroke="#22304F" stroke-width="6" />
+  <circle cx="182" cy="264" r="20" fill="#DBEAFE" />
+  <circle cx="470" cy="264" r="50" fill="#0B1524" />
+  <circle cx="470" cy="264" r="36" fill="none" stroke="#22304F" stroke-width="6" />
+  <circle cx="470" cy="264" r="20" fill="#DBEAFE" />
+</svg>

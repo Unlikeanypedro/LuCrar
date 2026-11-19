@@ -50,8 +50,8 @@ Contexto: trabalho acadêmico (Laboratório 02, 15 pontos), com modelagem UML al
 
 - 🔐 **Autenticação:** cadastro e login obrigatórios (usuário e senha, BCrypt); papéis `CLIENTE`, `EMPRESA`, `BANCO`.
 - 👤 **CRUD de cliente:** RG, CPF, nome, endereço, profissão e até 3 rendimentos (empregador + valor).
-- 🚘 **Catálogo de automóveis:** matrícula, ano, marca, modelo, placa, valor da diária e proprietário (cliente, empresa ou banco). Clientes podem cadastrar veículos próprios; agentes podem cadastrar veículos vinculados a outras contas.
-- 📄 **Pedidos de aluguel:** criar, modificar, consultar e cancelar (cliente); avaliar e executar contrato (agente).
+- 🚘 **Catálogo de automóveis:** matrícula, ano, marca, modelo, placa, valor da diária, foto (opcional) e proprietário (cliente, empresa ou banco). Cada card usa a foto informada ou uma ilustração local por tipo de carroceria. Clientes podem cadastrar veículos próprios; agentes podem cadastrar veículos vinculados a outras contas.
+- 📄 **Pedidos de aluguel:** criar, modificar, consultar e cancelar (cliente); avaliar e executar contrato (agente), com o perfil do cliente (rendimentos e histórico) disponível na análise antes de conceder crédito.
 - 💳 **Contrato de crédito:** concedido por um banco agente ao aprovar o pedido.
 
 ---

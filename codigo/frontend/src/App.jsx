@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, clearAuth, logado } from "./api.js";
+import logo from "./assets/lucrar-logo.svg";
 import Login from "./Login.jsx";
 import Pedidos from "./Pedidos.jsx";
 import Clientes from "./Clientes.jsx";
@@ -33,11 +34,7 @@ export default function App() {
         <div className="app-shell">
             <aside className="sidebar">
                 <div className="brand">
-                    <img
-                        className="brand-mark"
-                        src="/src/assets/lucrar-logo.svg"
-                        alt="LuCrar logo"
-                    />
+                    <img className="brand-mark" src={logo} alt="LuCrar" />
                     <span>
                         LuCrar<small>MOBILITY</small>
                     </span>

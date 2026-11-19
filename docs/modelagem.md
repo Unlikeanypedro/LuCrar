@@ -62,6 +62,8 @@ classDiagram
         String marca
         String modelo
         String placa
+        BigDecimal valorDiaria
+        String imagemUrl
         Proprietario proprietario
     }
     class PedidoAluguel {
@@ -83,6 +85,7 @@ classDiagram
     class StatusPedido {
         <<enumeration>>
         PENDENTE
+        EM_ANALISE
         APROVADO
         REJEITADO
         CONTRATADO
@@ -100,13 +103,13 @@ classDiagram
     Cliente "1" -- "0..*" PedidoAluguel : introduz
     PedidoAluguel "0..*" --> "1" Automovel : aluga
     PedidoAluguel "1" o-- "0..1" ContratoCredito
-    ContratoCredito "0..*" --> "1" Usuario : banco concedente
+    ContratoCredito "0..*" --> "1" Agente : banco concedente
     Usuario --> Papel
     PedidoAluguel --> StatusPedido
     Automovel --> Proprietario
 ```
 
-Ciclo de vida do pedido: `PENDENTE → APROVADO → CONTRATADO`; `PENDENTE → REJEITADO`; `CANCELADO` (cliente, antes do contrato).
+Ciclo de vida do pedido: `PENDENTE → EM_ANALISE` (agente assume a análise) `→ APROVADO → CONTRATADO`; `EM_ANALISE → REJEITADO`; `CANCELADO` (cliente, antes do contrato). O banco consulta o perfil do cliente (rendimentos e histórico) antes de registrar o `ContratoCredito`.
 
 ## 3. Diagrama de Pacotes (Visão Lógica — MVC)
 
@@ -151,3 +154,4 @@ flowchart TB
 | UC4–UC7 | `PedidoController`, `PedidoService` |
 | UC8–UC10 | `PedidoService.avaliar` / `contratar` |
 | UC11 | `AutomovelController` |
+| Perfil do cliente na análise | `Cliente` (`rendimentos`) exposto em `GET /api/clientes` |

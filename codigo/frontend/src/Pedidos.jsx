@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { api } from "./api.js";
 
 const novo = { automovelId: "", dataInicio: "", dataFim: "" };
@@ -7,6 +7,112 @@ const hoje = (() => {
     data.setMinutes(data.getMinutes() - data.getTimezoneOffset());
     return data.toISOString().slice(0, 10);
 })();
+
+const encerrados = ["CANCELADO", "REJEITADO", "REPROVADO"];
+
+/**
+ * Perfil financeiro do cliente exibido ao agente durante a análise (HU08).
+ * Bancos consultam renda declarada, histórico e comprometimento antes de
+ * conceder o crédito (HU09).
+ */
+function PerfilCliente({ pedido, pedidos, moeda }) {
+    const cliente = pedido.cliente ?? {};
+    const rendimentos = cliente.rendimentos ?? [];
+    const rendaMensal = rendimentos.reduce(
+        (total, item) => total + Number(item.valor || 0),
+        0,
+    );
+    const valorPedido = pedido.valorTotal != null ? Number(pedido.valorTotal) : null;
+    const comprometimento =
+        rendaMensal > 0 && valorPedido != null
+            ? (valorPedido / rendaMensal) * 100
+            : null;
+    const historico = pedidos.filter((item) => item.cliente?.id === cliente.id);
+    const contratados = historico.filter((item) => item.status === "CONTRATADO").length;
+    const emAberto = historico.filter((item) => !encerrados.includes(item.status)).length;
+    const situacao =
+        comprometimento == null
+            ? { rotulo: "Renda não declarada", classe: "neutro" }
+            : comprometimento <= 30
+              ? { rotulo: "Comprometimento baixo", classe: "bom" }
+              : comprometimento <= 60
+                ? { rotulo: "Comprometimento moderado", classe: "medio" }
+                : { rotulo: "Comprometimento alto", classe: "alto" };
+
+    return (
+        <div className="perfil-card">
+            <div className="perfil-head">
+                <div>
+                    <span className="perfil-eyebrow">Perfil do cliente</span>
+                    <h3>{cliente.nome || "Cliente sem nome"}</h3>
+                    <p>
+                        CPF {cliente.cpf || "—"} · RG {cliente.rg || "—"} ·{" "}
+                        {cliente.profissao || "Profissão não informada"}
+                    </p>
+                </div>
+                <span className={`perfil-situacao perfil-situacao-${situacao.classe}`}>
+                    {situacao.rotulo}
+                </span>
+            </div>
+            <div className="perfil-grid">
+                <div>
+                    <span>Endereço</span>
+                    <strong>{cliente.endereco || "—"}</strong>
+                </div>
+                <div>
+                    <span>Renda mensal declarada</span>
+                    <strong>{moeda(rendaMensal)}</strong>
+                </div>
+                <div>
+                    <span>Total do pedido</span>
+                    <strong>{valorPedido != null ? moeda(valorPedido) : "—"}</strong>
+                </div>
+                <div>
+                    <span>Comprometimento da renda</span>
+                    <strong>
+                        {comprometimento != null
+                            ? `${comprometimento.toFixed(0)}%`
+                            : "—"}
+                    </strong>
+                </div>
+                <div>
+                    <span>Pedidos no histórico</span>
+                    <strong>{historico.length}</strong>
+                </div>
+                <div>
+                    <span>Contratos executados</span>
+                    <strong>{contratados}</strong>
+                </div>
+            </div>
+            <h4>Rendimentos declarados</h4>
+            {rendimentos.length === 0 ? (
+                <p className="muted">
+                    O cliente não informou rendimentos. Peça a comprovação antes
+                    de conceder crédito.
+                </p>
+            ) : (
+                <ul className="perfil-rendimentos">
+                    {rendimentos.map((item, index) => (
+                        <li key={index}>
+                            <span>{item.entidadeEmpregadora || "Não informado"}</span>
+                            <strong>{moeda(item.valor ?? 0)}</strong>
+                        </li>
+                    ))}
+                    <li className="perfil-rendimentos-total">
+                        <span>Total mensal</span>
+                        <strong>{moeda(rendaMensal)}</strong>
+                    </li>
+                </ul>
+            )}
+            {emAberto > 1 && (
+                <p className="perfil-alerta">
+                    O cliente possui {emAberto} pedidos em aberto. Considere o
+                    comprometimento total da renda antes de conceder crédito.
+                </p>
+            )}
+        </div>
+    );
+}
 
 export default function Pedidos({
     user,
@@ -21,11 +127,12 @@ export default function Pedidos({
     const [mensagem, setMensagem] = useState("");
     const [pareceres, setPareceres] = useState({});
     const [creditos, setCreditos] = useState({});
+    const [perfilId, setPerfilId] = useState(null);
     const [salvando, setSalvando] = useState(false);
     const agente = user.papel !== "CLIENTE";
     const pendentes = pedidos.filter((p) => p.status === "PENDENTE").length;
     const ativos = pedidos.filter(
-        (p) => !["CANCELADO", "CONTRATADO", "REJEITADO", "REPROVADO"].includes(p.status),
+        (p) => ![...encerrados, "CONTRATADO"].includes(p.status),
     ).length;
     const carroSelecionado = carros.find(
         (carro) => String(carro.id) === String(f.automovelId),
@@ -278,7 +385,8 @@ export default function Pedidos({
                         </thead>
                         <tbody>
                             {pedidos.map((p) => (
-                                <tr key={p.id}>
+                                <Fragment key={p.id}>
+                                <tr>
                                     <td className="muted">
                                         #{String(p.id).padStart(4, "0")}
                                     </td>
@@ -347,6 +455,22 @@ export default function Pedidos({
                                             </label>
                                         )}
                                         <div className="actions">
+                                            {agente && (
+                                                <button
+                                                    className="secondary"
+                                                    onClick={() =>
+                                                        setPerfilId(
+                                                            perfilId === p.id
+                                                                ? null
+                                                                : p.id,
+                                                        )
+                                                    }
+                                                >
+                                                    {perfilId === p.id
+                                                        ? "Fechar perfil"
+                                                        : "Perfil do cliente"}
+                                                </button>
+                                            )}
                                             {!agente &&
                                                 p.status === "PENDENTE" && (
                                                     <button
@@ -425,6 +549,18 @@ export default function Pedidos({
                                         </div>
                                     </td>
                                 </tr>
+                                {perfilId === p.id && (
+                                    <tr className="perfil-row">
+                                        <td colSpan={agente ? 9 : 8}>
+                                            <PerfilCliente
+                                                pedido={p}
+                                                pedidos={pedidos}
+                                                moeda={moeda}
+                                            />
+                                        </td>
+                                    </tr>
+                                )}
+                                </Fragment>
                             ))}
                         </tbody>
                     </table>

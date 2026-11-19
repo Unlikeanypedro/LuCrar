@@ -147,7 +147,7 @@ public class PedidoService {
                 p.setParcelasAprovadas(null);
             }
         } else {
-            p.setStatus(REPROVADO);
+            p.setStatus(REJEITADO);
             p.setValorCreditoAprovado(null);
             p.setTaxaJurosMensalAprovada(null);
             p.setParcelasAprovadas(null);

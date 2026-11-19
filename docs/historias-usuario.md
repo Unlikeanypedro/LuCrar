@@ -9,8 +9,8 @@
 | HU05 | cliente | consultar o status dos meus pedidos | acompanhar a análise | vejo apenas meus pedidos |
 | HU06 | cliente | modificar um pedido pendente | corrigir período/automóvel | só enquanto `PENDENTE` |
 | HU07 | cliente | cancelar um pedido | desistir do aluguel | não cancela se já `CONTRATADO` |
-| HU08 | agente | avaliar financeiramente um pedido | aprovar ou rejeitar | pedido `PENDENTE` vira `APROVADO` ou `REJEITADO` |
-| HU09 | agente (banco) | conceder crédito ao aprovar | financiar o aluguel | registra `ContratoCredito` com valor e banco |
+| HU08 | agente | avaliar financeiramente um pedido | aprovar ou rejeitar | agente assume o pedido (`EM_ANALISE`), consulta o perfil do cliente e registra parecer; o pedido vira `APROVADO` ou `REJEITADO` |
+| HU09 | agente (banco) | conceder crédito ao aprovar | financiar o aluguel | perfil do cliente (rendimentos e histórico) disponível para consulta antes da decisão; registra `ContratoCredito` com valor e banco |
 | HU10 | agente | executar o contrato de um pedido aprovado | formalizar o aluguel | `APROVADO` vira `CONTRATADO` |
-| HU11 | agente | cadastrar automóveis | disponibilizá-los para aluguel | matrícula, ano, marca, modelo, placa e proprietário |
+| HU11 | agente | cadastrar automóveis | disponibilizá-los para aluguel | matrícula, ano, marca, modelo, placa, diária, foto (opcional) e proprietário |
 | HU12 | agente | modificar qualquer pedido não finalizado | corrigir dados | não altera `CANCELADO`/`CONTRATADO` |

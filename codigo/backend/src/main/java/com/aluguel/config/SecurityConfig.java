@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /** Login obrigatório (usuário e senha via HTTP Basic, senha com BCrypt). Só o cadastro é público. */
@@ -81,15 +82,30 @@ public class SecurityConfig {
                 .orElseThrow(() -> new UsernameNotFoundException(login));
     }
 
+    /** Diária usada para recuperar veículos legados sem preço (HU04). */
+    private static final BigDecimal DIARIA_PADRAO = new BigDecimal("149.90");
+
     /** Catálogo inicial de automóveis para o protótipo. */
     @Bean
     CommandLineRunner dadosIniciais(AutomovelRepository repo) {
         return args -> {
-            if (repo.count() > 0) return;
+            if (repo.count() > 0) {
+                // Sem diária o pedido é recusado e o catálogo fica inutilizável.
+                repo.findAll().stream()
+                    .filter(a ->
+                        a.getValorDiaria() == null ||
+                        a.getValorDiaria().signum() <= 0
+                    )
+                    .forEach(a -> {
+                        a.setValorDiaria(DIARIA_PADRAO);
+                        repo.save(a);
+                    });
+                return;
+            }
             String[][] carros = {
-                { "Fiat", "Argo", "2023", "ABC1D23" },
-                { "VW", "Polo", "2024", "BRA2E19" },
-                { "Chevrolet", "Onix", "2022", "QWE3F45" },
+                { "Fiat", "Argo", "2023", "ABC1D23", "129.90" },
+                { "VW", "Polo", "2024", "BRA2E19", "149.90" },
+                { "Chevrolet", "Onix", "2022", "QWE3F45", "119.90" },
             };
             int i = 1;
             for (var c : carros) {
@@ -98,6 +114,7 @@ public class SecurityConfig {
                 a.setModelo(c[1]);
                 a.setAno(Integer.parseInt(c[2]));
                 a.setPlaca(c[3]);
+                a.setValorDiaria(new BigDecimal(c[4]));
                 a.setMatricula("MAT-" + i++);
                 repo.save(a);
             }

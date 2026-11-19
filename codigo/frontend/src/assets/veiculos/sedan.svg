@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Ilustração de um automóvel sedan">
+  <rect width="640" height="360" fill="#F3F5F9" />
+  <circle cx="470" cy="100" r="136" fill="#DBEAFE" />
+  <circle cx="152" cy="292" r="74" fill="#E8EEF9" />
+  <ellipse cx="320" cy="306" rx="272" ry="14" fill="#DDE4EF" />
+  <path d="M176 298c28-34 68-48 116-48h60c48 0 88 14 116 48" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" />
+  <path d="M150 208c16-46 54-74 100-80h112c48 8 84 38 98 80H150z" fill="#14213D" />
+  <path d="M174 200c14-38 46-58 82-62h52v62H174z" fill="#DBEAFE" />
+  <path d="M322 138h38c34 6 62 30 74 62H322v-62z" fill="#DBEAFE" opacity=".85" />
+  <rect x="52" y="204" width="536" height="60" rx="24" fill="#14213D" />
+  <rect x="52" y="232" width="536" height="32" rx="16" fill="#2563EB" opacity=".16" />
+  <path d="M300 206v52" stroke="#0B1524" stroke-width="3" opacity=".35" />
+  <rect x="326" y="226" width="26" height="8" rx="4" fill="#DBEAFE" opacity=".9" />
+  <rect x="544" y="216" width="30" height="12" rx="6" fill="#F59E0B" />
+  <rect x="58" y="216" width="20" height="12" rx="6" fill="#B42318" />
+  <circle cx="186" cy="260" r="44" fill="#0B1524" />
+  <circle cx="186" cy="260" r="32" fill="none" stroke="#22304F" stroke-width="6" />
+  <circle cx="186" cy="260" r="18" fill="#DBEAFE" />
+  <circle cx="470" cy="260" r="44" fill="#0B1524" />
+  <circle cx="470" cy="260" r="32" fill="none" stroke="#22304F" stroke-width="6" />
+  <circle cx="470" cy="260" r="18" fill="#DBEAFE" />
+</svg>

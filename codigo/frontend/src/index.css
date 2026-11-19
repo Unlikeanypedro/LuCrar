@@ -1317,3 +1317,141 @@ textarea {
     height: 36px;
     padding: 7px 9px;
 }
+
+/* Perfil do cliente na análise financeira (HU08/HU09) */
+.perfil-row:hover {
+    background: transparent;
+}
+.perfil-row td {
+    padding: 0;
+    background: var(--brand-bg);
+}
+.perfil-card {
+    display: grid;
+    gap: 14px;
+    padding: 18px 20px;
+}
+.perfil-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.perfil-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--brand-blue);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+.perfil-head h3 {
+    margin: 0 0 4px;
+    color: var(--brand-navy);
+    font: 800 17px Manrope, sans-serif;
+}
+.perfil-head p {
+    margin: 0;
+    color: var(--brand-slate);
+    font-size: 12px;
+}
+.perfil-situacao {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.perfil-situacao-bom {
+    background: var(--brand-pale-blue);
+    color: #1d4ed8;
+}
+.perfil-situacao-medio {
+    background: var(--brand-pale-amber);
+    color: #8a4b08;
+}
+.perfil-situacao-alto {
+    background: var(--brand-pale-red);
+    color: var(--brand-red);
+}
+.perfil-situacao-neutro {
+    background: #e2e8f0;
+    color: #475569;
+}
+.perfil-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.perfil-grid > div {
+    display: grid;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--brand-border);
+    border-radius: 10px;
+    background: #fff;
+}
+.perfil-grid span,
+.perfil-card h4 {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+.perfil-grid strong {
+    color: var(--brand-navy);
+    font-size: 13px;
+}
+.perfil-card h4 {
+    margin: 0;
+}
+.perfil-rendimentos {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.perfil-rendimentos li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--brand-border);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--brand-slate);
+    font-size: 12px;
+}
+.perfil-rendimentos li strong {
+    color: var(--brand-navy);
+}
+.perfil-rendimentos .perfil-rendimentos-total {
+    border-color: #bfd3f5;
+    background: var(--brand-pale-blue);
+    color: var(--brand-navy);
+    font-weight: 700;
+}
+.perfil-alerta {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: var(--brand-pale-amber);
+    color: #8a4b08;
+    font-size: 12px;
+}
+@media (max-width: 800px) {
+    .perfil-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .perfil-head {
+        flex-direction: column;
+    }
+}
+@media (max-width: 520px) {
+    .perfil-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -32,6 +32,10 @@ public class Automovel {
     @Column(name = "valor_diaria", precision = 10, scale = 2)
     private BigDecimal valorDiaria;
 
+    /** Foto opcional do veículo exibida no catálogo. */
+    @Column(name = "imagem_url", length = 500)
+    private String imagemUrl;
+
     /** Categoria do proprietário na tabela automovel do Supabase. */
     @Enumerated(EnumType.STRING)
     @Column(name = "proprietario_tipo")

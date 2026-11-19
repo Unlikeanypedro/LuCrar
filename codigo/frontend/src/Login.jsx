@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api, clearAuth, setAuth } from "./api.js";
+import logo from "./assets/lucrar-logo.svg";
 
 const vazio = {
     nome: "",
@@ -78,11 +79,7 @@ export default function Login({ onLogin }) {
             <section className="login-art">
                 <div>
                     <div className="brand">
-                        <img
-                            className="brand-mark"
-                            src="/src/assets/lucrar-logo.svg"
-                            alt="LuCrar logo"
-                        />
+                        <img className="brand-mark" src={logo} alt="LuCrar" />
                         <span>
                             LuCrar<small>MOBILITY</small>
                         </span>

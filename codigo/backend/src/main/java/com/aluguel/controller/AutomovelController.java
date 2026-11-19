@@ -119,6 +119,11 @@ public class AutomovelController {
         a.setModelo(dto.modelo());
         a.setPlaca(dto.placa());
         a.setValorDiaria(dto.valorDiaria());
+        a.setImagemUrl(
+            dto.imagemUrl() == null || dto.imagemUrl().isBlank()
+                ? null
+                : dto.imagemUrl().trim()
+        );
         a.setProprietario(categoria);
         a.setProprietarioClienteId(proprietarioClienteId);
         a.setProprietarioAgenteId(proprietarioAgenteId);
@@ -164,6 +169,7 @@ public class AutomovelController {
             a.getModelo(),
             a.getPlaca(),
             a.getValorDiaria(),
+            a.getImagemUrl(),
             a.getProprietario(),
             idProprietario(a)
         );

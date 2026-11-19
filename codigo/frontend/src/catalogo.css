@@ -82,7 +82,13 @@
 }
 
 .catalog-register-form input { width: 100%; height: 42px; }
-.catalog-register-form button { min-height: 42px; }
+.catalog-register-form .catalog-photo-field { grid-column: span 2; }
+.catalog-register-form button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 42px;
+  padding-inline: 22px;
+}
 .catalog-register-form button:disabled { cursor: wait; opacity: .7; }
 
 .catalog-toolbar {
@@ -162,6 +168,35 @@
 .vehicle-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px #17332414;
+}
+
+.vehicle-photo {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: 1px solid #e7ece7;
+  background: #f3f5f9;
+}
+
+.vehicle-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehicle-photo-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #ffffffd9;
+  color: #14213d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
 }
 
 .vehicle-card-content {
@@ -340,10 +375,12 @@
   }
 
   .catalog-register-form { grid-template-columns: 1fr 1fr; }
+  .catalog-register-form .catalog-photo-field { grid-column: 1 / -1; }
 
 }
 
 @media (max-width: 420px) {
   .catalog-register-form { grid-template-columns: 1fr; }
+  .catalog-register-form .catalog-photo-field { grid-column: auto; }
   .catalog-heading-actions > button { padding: 8px 10px; font-size: 11px; }
 }

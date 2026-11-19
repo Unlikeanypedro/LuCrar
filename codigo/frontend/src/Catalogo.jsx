@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from './api.js';
+import hatchSvg from './assets/veiculos/hatch.svg';
+import sedanSvg from './assets/veiculos/sedan.svg';
+import suvSvg from './assets/veiculos/suv.svg';
+import picapeSvg from './assets/veiculos/picape.svg';
 import './catalogo.css';
 
 const proprietarios = {
@@ -7,6 +11,29 @@ const proprietarios = {
   EMPRESA: 'Empresa',
   BANCO: 'Banco',
 };
+
+// Ilustrações locais usadas quando o veículo não tem foto cadastrada.
+const ilustracoes = {
+  hatch: hatchSvg,
+  sedan: sedanSvg,
+  suv: suvSvg,
+  picape: picapeSvg,
+};
+
+const categoriasDeCarroceria = [
+  { tipo: 'picape', modelos: ['strada', 'toro', 'hilux', 'ranger', 'amarok', 'saveiro', 'frontier', 'l200', 'montana', 'picape'] },
+  { tipo: 'suv', modelos: ['compass', 'renegade', 'creta', 't-cross', 'tcross', 'nivus', 'hr-v', 'hrv', 'duster', 'tiguan', 'tracker', 'kicks', 'pulse', 'fastback', 'captur', 'suv'] },
+  { tipo: 'sedan', modelos: ['corolla', 'civic', 'virtus', 'cronos', 'sentra', 'jetta', 'city', 'logan', 'voyage', 'prisma', 'sedan'] },
+  { tipo: 'hatch', modelos: ['argo', 'onix', 'polo', 'hb20', 'gol', 'fox', 'uno', 'mobi', 'kwid', '208', 'sandero', 'march', 'fit', 'yaris'] },
+];
+
+function ilustracaoDoVeiculo(carro) {
+  const modelo = String(carro?.modelo ?? '').toLocaleLowerCase('pt-BR');
+  const categoria = categoriasDeCarroceria.find(({ modelos }) =>
+    modelos.some((termo) => modelo.includes(termo)),
+  );
+  return ilustracoes[categoria?.tipo || 'hatch'];
+}
 
 export default function Catalogo({ user, onSolicitar }) {
   const [carros, setCarros] = useState([]);
@@ -23,6 +50,7 @@ export default function Catalogo({ user, onSolicitar }) {
     modelo: '',
     placa: '',
     valorDiaria: '',
+    imagemUrl: '',
   });
 
   useEffect(() => {
@@ -51,11 +79,12 @@ export default function Catalogo({ user, onSolicitar }) {
         ...novoCarro,
         ano: Number(novoCarro.ano),
         valorDiaria: Number(novoCarro.valorDiaria),
+        imagemUrl: novoCarro.imagemUrl.trim() || null,
         proprietario: categorias[user.papel],
         proprietarioId: user.id,
       });
       setCarros((lista) => [criado, ...lista]);
-      setNovoCarro({ ano: '', marca: '', modelo: '', placa: '', valorDiaria: '' });
+      setNovoCarro({ ano: '', marca: '', modelo: '', placa: '', valorDiaria: '', imagemUrl: '' });
       setFormAberto(false);
       setMensagem('Automóvel cadastrado e disponível no catálogo.');
     } catch (e) {
@@ -106,6 +135,7 @@ export default function Catalogo({ user, onSolicitar }) {
             <label>Modelo<input required value={novoCarro.modelo} onChange={(e) => setNovoCarro({ ...novoCarro, modelo: e.target.value })} /></label>
             <label>Placa<input required value={novoCarro.placa} onChange={(e) => setNovoCarro({ ...novoCarro, placa: e.target.value })} /></label>
             <label>Diária (R$)<input required type="number" min="0.01" step="0.01" value={novoCarro.valorDiaria} onChange={(e) => setNovoCarro({ ...novoCarro, valorDiaria: e.target.value })} /></label>
+            <label className="catalog-photo-field">Foto do veículo (URL opcional)<input type="url" placeholder="https://…" value={novoCarro.imagemUrl} onChange={(e) => setNovoCarro({ ...novoCarro, imagemUrl: e.target.value })} /></label>
             <button type="submit" disabled={salvando}>{salvando ? 'Salvando…' : 'Publicar no catálogo'}</button>
           </form>
         </div>
@@ -144,8 +174,22 @@ export default function Catalogo({ user, onSolicitar }) {
         <div className="catalog-grid">
           {carrosFiltrados.map((carro) => {
             const tipoProprietario = proprietarios[carro.proprietario] || 'Não informado';
+            const ilustracao = ilustracaoDoVeiculo(carro);
+            const foto = carro.imagemUrl?.trim() || ilustracao;
             return (
               <article className="vehicle-card" key={carro.id}>
+                <div className="vehicle-photo">
+                  <img
+                    src={foto}
+                    alt={`${carro.marca ?? ''} ${carro.modelo ?? ''} ${carro.ano ?? ''}`.trim()}
+                    loading="lazy"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = ilustracao;
+                    }}
+                  />
+                  <span className="vehicle-photo-tag">{tipoProprietario}</span>
+                </div>
                 <div className="vehicle-card-content">
                   <div className="vehicle-meta"><span>{carro.ano || 'Ano não informado'}</span><span>Matrícula {carro.matricula || '—'}</span></div>
                   <h2>{carro.marca} <span>{carro.modelo}</span></h2>
